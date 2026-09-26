@@ -1,34 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateCustomerDto } from './dto/create-customer.dto.ts';
 import { UpdateCustomerDto } from './dto/update-customer.dto.ts';
+import { Customer } from './entities/customer.entity.ts';
 
 @Injectable()
 export class CustomerService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    @InjectRepository(Customer)
+    private readonly customerRepository: Repository<Customer>,
+  ) {}
 
   create(createCustomerDto: CreateCustomerDto) {
-    const dbHost = this.configService.get<string>('database.host');
-    return `This action adds a new customer (db: ${dbHost})`;
+    return this.customerRepository.save(createCustomerDto);
   }
 
-getAllCustomers() {
-    return 'This action returns all customers';
+  getAllCustomers() {
+    return this.customerRepository.find();
   }
 
   findAll() {
-    return `This action returns all customer`;
+    return this.customerRepository.find();
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} customer`;
+    return this.customerRepository.findOneBy({ id });
   }
 
-  update(id: number, updateCustomerDto: UpdateCustomerDto) {
-    return `This action updates a #${id} customer`;
+  async update(id: number, updateCustomerDto: UpdateCustomerDto) {
+    await this.customerRepository.update(id, updateCustomerDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} customer`;
+  async remove(id: number) {
+    await this.customerRepository.delete(id);
+    return { deleted: true };
   }
 }
