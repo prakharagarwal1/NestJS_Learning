@@ -44,6 +44,44 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Running with Docker
+
+The project ships a `docker-compose.yml` that provisions all dependencies locally:
+
+```bash
+$ docker compose up --build
+```
+
+### Services
+
+| Service        | Port   | Purpose                                                    |
+| -------------- | ------ | ---------------------------------------------------------- |
+| `app`          | `3000` | NestJS server                                              |
+| `mysql`        | `3306` | MySQL database (`learning` database, root password `root`) |
+| `redis`        | `6379` | Redis cache store                                          |
+| `redisinsight` | `8081` | Redis web dashboard (`http://localhost:8081`)              |
+| `adminer`      | `8080` | MySQL web admin UI (`http://localhost:8080`)               |
+
+The app container reads `.env` for configuration. `DATABASE_HOST` is set to `mysql` (the compose service name) so the app can reach MySQL from inside the container network.
+
+## Caching
+
+HTTP GET responses are cached automatically via a global `CacheInterceptor` registered in `app.module.ts`. Cache keys are derived from the request URL.
+
+### Redis
+
+When `REDIS_HOST` and `REDIS_PORT` are set (see `.env`), the cache store uses Redis. Otherwise it falls back to an in-memory store.
+
+```bash
+REDIS_HOST=localhost
+REDIS_PORT=6379
+CACHE_TTL=30000
+```
+
+Running via Docker, `REDIS_HOST` should point to the compose service name `redis`. When running locally without Docker, use `localhost`.
+
+`docker-compose.yml` includes a `redis` service on port `6379` and a `redisinsight` dashboard on `http://localhost:8081` for inspecting cached keys.
+
 ## Run tests
 
 ```bash

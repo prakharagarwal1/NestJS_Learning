@@ -12,19 +12,15 @@ export class CustomerService {
     private readonly customerRepository: Repository<Customer>,
   ) {}
 
-  create(createCustomerDto: CreateCustomerDto) {
+  async create(createCustomerDto: CreateCustomerDto) {
     return this.customerRepository.save(createCustomerDto);
   }
 
-  getAllCustomers() {
+  async findAll() {
     return this.customerRepository.find();
   }
 
-  findAll() {
-    return this.customerRepository.find();
-  }
-
-  findOne(id: number) {
+  async findOne(id: number) {
     return this.customerRepository.findOneBy({ id });
   }
 
