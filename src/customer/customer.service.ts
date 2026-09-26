@@ -8,6 +8,10 @@ export class CustomerService {
     return 'This action adds a new customer';
   }
 
+getAllCustomers() {
+    return 'This action returns all customers';
+  }
+
   findAll() {
     return `This action returns all customer`;
   }

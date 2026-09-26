@@ -11,6 +11,10 @@ export class CustomerController {
   create(@Body() createCustomerDto: CreateCustomerDto) {
     return this.customerService.create(createCustomerDto);
   }
+  @Get("getAllCustomers")
+  getAllCustomers() {
+    return this.customerService.getAllCustomers();
+  }
 
   @Get()
   findAll() {
