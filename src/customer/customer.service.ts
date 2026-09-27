@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
 import { CreateCustomerDto } from './dto/create-customer.dto.ts';
 import { UpdateCustomerDto } from './dto/update-customer.dto.ts';
 import { Customer } from './entities/customer.entity.ts';
@@ -13,7 +14,12 @@ export class CustomerService {
   ) {}
 
   async create(createCustomerDto: CreateCustomerDto) {
-    return this.customerRepository.save(createCustomerDto);
+    try {
+      return await this.customerRepository.save(createCustomerDto);
+    } catch (error) {
+      const message = (error as { message?: string })?.message || 'Failed to create customer';
+      throw new BadRequestException(message);
+    }
   }
 
   async findAll() {
@@ -21,15 +27,36 @@ export class CustomerService {
   }
 
   async findOne(id: number) {
-    return this.customerRepository.findOneBy({ id });
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new BadRequestException('Invalid customer id');
+    }
+    const customer = await this.customerRepository.findOneBy({ id });
+    if (!customer) {
+      throw new NotFoundException(`Customer with id ${id} not found`);
+    }
+    return customer;
   }
 
   async update(id: number, updateCustomerDto: UpdateCustomerDto) {
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new BadRequestException('Invalid customer id');
+    }
+    const customer = await this.customerRepository.findOneBy({ id });
+    if (!customer) {
+      throw new NotFoundException(`Customer with id ${id} not found`);
+    }
     await this.customerRepository.update(id, updateCustomerDto);
     return this.findOne(id);
   }
 
   async remove(id: number) {
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new BadRequestException('Invalid customer id');
+    }
+    const customer = await this.customerRepository.findOneBy({ id });
+    if (!customer) {
+      throw new NotFoundException(`Customer with id ${id} not found`);
+    }
     await this.customerRepository.delete(id);
     return { deleted: true };
   }

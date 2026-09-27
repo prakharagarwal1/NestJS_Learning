@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---------- Build stage ----------
-FROM node:22-alpine AS builder
+FROM node:22-alpine3.23 AS builder
 
 WORKDIR /app
 
@@ -16,22 +16,23 @@ RUN npm ci
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
 COPY src ./src
-RUN npm run build
+RUN npm run build && npm prune --omit=dev \
+    && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 # ---------- Production stage ----------
-FROM node:22-alpine AS runner
+FROM node:22-alpine3.23 AS runner
 
 WORKDIR /app
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nestjs \
-    && adduser --system --uid 1001 --ingroup nestjs nestjs
+    && adduser --system --uid 1001 --ingroup nestjs nestjs \
+    && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 # Copy built output
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
-COPY .env* ./
 
 # Switch to non-root user
 USER nestjs
@@ -41,13 +42,14 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV DATABASE_TYPE=mysql
-ENV DATABASE_HOST=localhost
-ENV DATABASE_PORT=3306
-ENV DATABASE_USERNAME=root
-ENV DATABASE_PASSWORD=root
-ENV DATABASE_NAME=learning
-ENV REDIS_HOST=localhost
-ENV REDIS_PORT=6379
-ENV CACHE_TTL=30000
+# Service names are provided by docker-compose.yml (mysql, redis).
+# These are only used when running the image without compose.
+ENV DATABASE_HOST=
+ENV DATABASE_PORT=
+ENV DATABASE_USERNAME=
+ENV DATABASE_NAME=
+ENV REDIS_HOST=
+ENV REDIS_PORT=
+ENV CACHE_TTL=
 
 CMD ["node", "dist/main.js"]

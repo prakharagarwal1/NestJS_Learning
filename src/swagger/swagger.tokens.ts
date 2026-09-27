@@ -1,0 +1,1 @@
+export const SWAGGER_CONFIG = 'SWAGGER_CONFIG';

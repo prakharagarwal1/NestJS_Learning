@@ -1,10 +1,13 @@
-import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { AppModule, ObserveInstrument } from './app.module.ts';
 import { ConfigService } from '@nestjs/config';
-import { seedCustomers } from './seed/index.ts';
-import { Customer } from './customer/entities/customer.entity.ts';
+import { NestFactory } from '@nestjs/core';
 import { DataSource } from 'typeorm';
+
+import { AppModule, ObserveInstrument } from './app.module.ts';
+import { CustomerModule } from './customer/customer.module.ts';
+import { Customer } from './customer/entities/customer.entity.ts';
+import { seedCustomers } from './seed/index.ts';
+import { SwaggerService } from './swagger/index.ts';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -18,6 +21,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  const swaggerService = app.get(SwaggerService);
+  swaggerService.setup(app, [CustomerModule]);
 
   // Seed the customer table with dummy data on startup
   const dataSource = app.get(DataSource);

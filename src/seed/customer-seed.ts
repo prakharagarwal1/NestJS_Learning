@@ -1,4 +1,5 @@
 import { Repository } from 'typeorm';
+
 import { Customer } from '../customer/index.ts';
 
 interface SeedCustomer {

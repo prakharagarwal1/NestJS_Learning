@@ -1,11 +1,13 @@
-import { Module } from '@nestjs/common';
-import { createObserveModule } from '@nestjs/observe';
-import { DatabaseModule } from './database/index.ts';
-import { CustomerModule } from './customer/customer.module.ts';
-import { ConfigModule } from './config/index.ts';
-import { CacheModuleCustom } from './cache/index.ts';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CacheInterceptor } from '@nestjs/cache-manager';
+import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { createObserveModule } from '@nestjs/observe';
+
+import { CacheModuleCustom } from './cache/index.ts';
+import { ConfigModule } from './config/index.ts';
+import { CustomerModule } from './customer/customer.module.ts';
+import { DatabaseModule } from './database/index.ts';
+import { SwaggerModuleCustom } from './swagger/index.ts';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -15,6 +17,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     DatabaseModule.forRoot(),
     CustomerModule,
     CacheModuleCustom,
+    SwaggerModuleCustom,
   ],
   controllers: [],
   providers: [
